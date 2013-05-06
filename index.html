@@ -1,0 +1,341 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>Stuff Shooting AT Other Stuff and Stuff</title>
+	<style>
+		body {
+			margin:auto;
+            padding:auto;
+            width : 400px;
+            height: 600px;
+			background-color: #FFFFFF;
+		}
+	</style>
+	<script src="pixi.js"></script>
+    <script src="jquery-1.8.3.min.js"></script>
+	<script src="src/pixi/renderers/WebGLRenderer.js"></script>
+</head>
+<body>
+<audio autoplay loop id="audio">
+        <source src="back.wav" type="audio/wav">
+    </audio>
+<button id="pause">PAUSE</button>
+<button id="mute">MUTE</button>
+<button id="level">CHANGE LEVEL</button>
+    <script >
+      //global stuff
+      var level=1;
+      var down=false;
+      var start=false;
+      var eeggs = new Array();
+      var geggs= new Array();
+      var bunnehs=new Array();
+      var eeggshack=0;
+      var maxenemies=10*level;
+      var bunnehshack=5;
+      var starters=[30,90,150,210,270];
+      var geggshack=[7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7];
+      var score=0;
+	  var lifes=10;
+    
+    
+    
+    
+    //init();
+    var h=$(window).height();
+	var interactive = true;
+	var stage = new PIXI.Stage(0x999999);
+	var back = PIXI.Sprite.fromImage("back.jpg");
+    back.position.y=h-1280;
+    var back2 = PIXI.Sprite.fromImage("back.jpg");
+    back2.position.y=h;
+    stage.addChild(back);
+	stage.addChild(back2);
+	var renderer = PIXI.autoDetectRenderer(300, h-20);
+	document.body.appendChild(renderer.view);
+	requestAnimFrame( animate );
+	var scoretext = new PIXI.Text("SCORE: 0", "20px Snippet", "red");
+	var bigtext = new PIXI.Text("Click anyWhere", "20px Snippet", "red");
+	var lifetext = new PIXI.Text("LIFES: 10", "20px Snippet", "red");
+	bigtext.position.y=h/2;
+	bigtext.position.x=80;
+	lifetext.position.x=200;
+	stage.addChild(scoretext);
+	stage.addChild(bigtext);
+	stage.addChild(lifetext);
+	//TEXTURES
+	var youtexture = PIXI.Texture.fromImage("miniyou.png");
+    var etexture=PIXI.Texture.fromImage("e.png");
+    var gtexture=PIXI.Texture.fromImage("g.png");
+    var btexture=PIXI.Texture.fromImage("b.png");
+
+    //YOU 
+	var you = new PIXI.Sprite(youtexture);
+	you.anchor.x = 0.5;
+	you.anchor.y = 0.5;
+	you.position.x = 150;
+	you.position.y = h-20;
+	stage.addChild(you);
+
+	
+	//mouse TODO change to touch
+    var ccc = document.getElementsByTagName('canvas');
+      function getMousePos(ccc, evt) {
+        var rect = ccc.getBoundingClientRect();
+        return {
+          x: evt.clientX - rect.left,
+          y: evt.clientY - rect.top
+        };
+      }
+      
+        ccc[0].addEventListener('mousedown', function(evt) {
+            down=true;
+            var mousePos = getMousePos(ccc[0], evt);
+            you.position=mousePos;
+			if(!start){
+				start=true;
+				try{stage.removeChild(bigtext);}catch(e){}
+				requestAnimFrame( animate );
+			}
+      }, false);
+        ccc[0].addEventListener('mouseup', function(evt) {
+            down=false;
+            eeggshack=0;
+            
+      }, false);
+      ccc[0].addEventListener('mousemove', function(evt) {
+        if(start){
+            var mousePos = getMousePos(ccc[0], evt);
+            you.position=mousePos;
+        }
+           
+      }, false);
+      //everything else
+	  renderer.render(stage);
+    function animate() {
+	if(start){
+			//MOVING BACKGROUND
+			back.position.y+=1;
+			if(back.position.y>1280)back.position.y=back2.position.y-1279;
+			back2.position.y+=1;
+			if(back2.position.y>1280)back2.position.y=back.position.y-1279;
+			if(!start)return;
+			//SHOOTING EVIL EGGS
+			if(down){
+				if(!eeggshack--){
+					eeggs[eeggs.length]=new PIXI.Sprite(etexture);
+					eeggs[eeggs.length-1].position.x=you.position.x-6;
+					eeggs[eeggs.length-1].position.y=you.position.y-10;
+					stage.addChild(eeggs[eeggs.length-1]);
+					eeggshack=5;
+				}
+				
+			}
+			
+			if(!start)return;
+			//MOVING EVIL EGGS
+			for(i=0 ; i<eeggs.length ; i++){
+				eeggs[i].position.y-=5;
+			}
+			if(!start)return;
+			//DELETING EVIL EGGS
+			 if(eeggs.length>0){
+				while(eeggs[0].position.y<-20){
+					var temp=eeggs[0];
+					eeggs.shift();
+					stage.removeChild(temp);
+					delete temp;
+					if(eeggs.length<=0) break;
+				}
+			}
+			if(!start)return;
+			//SPAWNING NEW BUNNEHS
+			if(!bunnehshack--){
+				if(bunnehs.length<maxenemies){
+					bunnehs[bunnehs.length]=new PIXI.Sprite(btexture);
+					bunnehs[bunnehs.length-1].position.x=starters[Math.floor((Math.random()*5))];
+					bunnehs[bunnehs.length-1].position.y=0;
+					stage.addChild(bunnehs[bunnehs.length-1]);
+				}
+				bunnehshack=5;
+			}
+			
+			if(!start)return;
+			//MOVING BUNNEHS
+			for(i=0 ; i<bunnehs.length ; i++){
+				bunnehs[i].position.y+=Math.floor((Math.random()*3));
+				bunnehs[i].position.x+=5*Math.cos(Math.floor(Math.random()*360));
+				if(bunnehs[i].position.x<0)bunnehs[i].position.x=0;
+				if(bunnehs[i].position.x>300)bunnehs[i].position.x=300;
+			}
+			if(!start)return;
+			//DElETING BUNNEHS 
+			if(bunnehs.length>0){
+				while(bunnehs[0].position.y>h+20){
+						var temp=bunnehs[0];
+						bunnehs.shift();
+						stage.removeChild(temp);
+						delete temp;
+						if(bunnehs.length<=0) break;
+					}
+			   }
+			   if(!start)return;
+			//SPAWNING GOOD EGGS
+			for(i=0 ; i<bunnehs.length ; i++){
+				if(!geggshack[i]--){
+					geggs[geggs.length]=new PIXI.Sprite(gtexture);
+					geggs[geggs.length-1].position.x=bunnehs[i].position.x;
+					geggs[geggs.length-1].position.y=bunnehs[i].position.y;
+					stage.addChild(geggs[geggs.length-1]);
+					geggshack[i]=100;
+				}
+			}
+			if(!start)return;
+			 //MOVING GOOD EGGS
+			for(i=0 ; i<geggs.length ; i++){
+				geggs[i].position.y+=5;
+			}
+			if(!start)return;
+			//DELETING GOOD EGGS
+			try{
+				if(geggs.length>0){
+					while(geggs[0].position.y>h+20){
+						var temp=geggs[0];
+						geggs.shift();
+						stage.removeChild(temp);
+						delete temp;
+						if(geggs.length<=0) break;
+					}
+				}
+			}catch(e){}
+			if(!start)return;
+			//Collisons
+			//bunnehs vs evil eggs
+			for(i=0;i<bunnehs.length;i++){
+				for (j=0;j<eeggs.length;j++){
+					if(collide(bunnehs[i],eeggs[j])){
+						stage.removeChild(bunnehs[i]);
+						stage.removeChild(eeggs[j]);
+						eeggs.splice(j--,1);
+						bunnehs.splice(i--,1);
+						score+=100;
+						break;
+					}
+				}
+			}
+			if(!start)return;
+			//you vs good eggs
+			for (j=0;j<geggs.length;j++){
+				if(collide(you,geggs[j])){
+				try{
+					stage.removeChild(geggs[j]);
+					}catch(e){}
+					geggs.splice(j--,1);
+					lifes--;
+					break;
+				}
+			}
+			if(!start)return;
+			//update score
+			scoretext.setText("SCORE: "  + score );
+			lifetext.setText("LIFES: "  + lifes );
+			updatelifemeter();
+			// render the stage   
+			renderer.render(stage);
+			requestAnimFrame( animate );
+		}
+	}//END ANIMATE FUNCTION
+    
+    function collide(z, zz)
+            {
+				if(!start)return false;
+                if(!z||!zz)return false;
+                var safex = z.width / 2 + zz.width / 2; var safey = z.height / 2 + zz.height / 2;
+                if (Math.abs(z.position.x - zz.position.x) < safex*.9 && Math.abs(z.position.y - zz.position.y) < safey*.9)
+                    return true;
+				else return false;
+            }
+			//missleading name handles loss and new game
+    function updatelifemeter(){
+		if(!start)return;
+		//console.log(lifes);
+			if(lifes<=0){
+			start=false;
+			lifes=10;
+			score=0;
+			lifetext.setText("LIFES: "  + 0 );
+			for(i=0;i<eeggs.length;i++){
+				var temp=eeggs[i];
+				stage.removeChild(eeggs[i]);
+				delete temp;
+			}
+			for(i=0;i<geggs.length;i++){
+				var temp=geggs[i];
+				try{
+					stage.removeChild(geggs[i]);
+				}catch(e){}
+				delete temp;
+			}
+			for(i=0;i<bunnehs.length;i++){
+				var temp=bunnehs[i];
+				stage.removeChild(bunnehs[i]);
+				delete temp;
+			}
+			stage.addChild(bigtext);
+			eeggs=[];
+			geegs=[];
+			bunnehs=[];
+		}
+		renderer.render(stage);
+		
+	}
+	//puase button
+	var pause=document.getElementById("pause");
+		pause.addEventListener('click', function(evt) {
+        if(start){
+            start=false;
+			down=false;
+			stage.addChild(bigtext);
+        }
+		renderer.render(stage);
+      }, false);
+	  //mute button
+	  var aud=document.getElementById("audio");
+	  var mute=document.getElementById("mute");
+		mute.addEventListener('click', function(evt) {
+		
+		//var song = $(this).next('audio').get(0);
+        if (aud.paused)
+         aud.play();
+       else
+         aud.pause();
+      }, false);
+	  //levelbutton
+	  var levelb=document.getElementById("level");
+	  levelb.addEventListener('click', function(evt) {
+		level=2/level;
+		maxenemies=10*level;
+		stage.removeChild(back);
+		stage.removeChild(back2);
+		if(level==2){
+		back = PIXI.Sprite.fromImage("back2.jpg");
+		back2 = PIXI.Sprite.fromImage("back2.jpg");
+		}
+		else{
+		back = PIXI.Sprite.fromImage("back.jpg");
+		back2 = PIXI.Sprite.fromImage("back.jpg");
+		}
+		lifes=0;
+		updatelifemeter();
+		back.position.y=h-1280;
+		back2.position.y=h;
+		stage.addChildAt(back,0);
+		stage.addChildAt(back2,1);
+		//you=new PIXI.Sprite.(youtexture);
+		//stage.addchild(you);
+      }, false);
+	  
+	</script>
+
+	</body>
+</html>
