@@ -1,0 +1,204 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>easter my.....</title>
+	<style>
+		body {
+			margin:auto;
+            padding:auto;
+            width : 400px;
+            height: 600px;
+			background-color: #FFFFFF;
+		}
+	</style>
+	<script src="pixi.js"></script>
+    <script src="jquery-1.8.3.min.js"></script>
+	<script src="src/pixi/renderers/WebGLRenderer.js"></script>
+</head>
+<body>
+    <script >
+      //global stuff
+      var level=1;
+      var down=false;
+      var start=false;
+      var eeggs = new Array();
+      var geggs= new Array();
+      var bunnehs=new Array();
+      var eeggshack=0;
+      var maxenemies=10*level;
+      var bunnehshack=5;
+      var starters=[30,90,150,210,270];
+      var geggshack=[7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7];
+    /*
+    <audio autoplay loop>
+        <source src="back.wav" type="audio/wav">
+    </audio>*/
+    
+    
+    //init();
+    var h=$(window).height();
+	var interactive = true;
+	var stage = new PIXI.Stage(0x999999, interactive);
+	var back = PIXI.Sprite.fromImage("back.jpg");
+    back.position.y=h-1280;
+    var back2 = PIXI.Sprite.fromImage("back.jpg");
+    back2.position.y=h;
+    stage.addChild(back);
+	stage.addChild(back2);
+	var renderer = PIXI.autoDetectRenderer(300, h-2);
+	document.body.appendChild(renderer.view);
+	requestAnimFrame( animate );
+	
+	//TEXTURES
+	var youtexture = PIXI.Texture.fromImage("you.png");
+    var etexture=PIXI.Texture.fromImage("e.png");
+    var gtexture=PIXI.Texture.fromImage("g.png");
+    var btexture=PIXI.Texture.fromImage("b.png");
+
+    
+	var you = new PIXI.Sprite(youtexture);
+	you.anchor.x = 0.5;
+	you.anchor.y = 0.5;
+	you.position.x = 150;
+	you.position.y = h-20;
+	stage.addChild(you);
+
+	
+	//mouse TODO change to touch
+    back.setInteractive(true);
+    back.mousedown = back.touchstart= back2.mousedown = back2.touchstart = function(data){
+			down=true;
+            start=true;
+            you.position=data.position;
+            //console.log(data);
+		};
+        back.mousemove = back.touchmove= back2.mousemove = back2.touchmove = function(data){
+            you.position=data.position;
+		};
+        back.mouseup = back.touchdone= back2.mouseup = back2.touchdone = function(data){
+            down=false;
+		};
+       /*
+    var ccc = document.getElementsByTagName('canvas');
+      function getMousePos(ccc, evt) {
+        var rect = ccc.getBoundingClientRect();
+        return {
+          x: evt.clientX - rect.left,
+          y: evt.clientY - rect.top
+        };
+      }
+      
+        ccc[0].addEventListener('mousedown', function(evt) {
+            down=true;
+            start=true;
+            var mousePos = getMousePos(ccc[0], evt);
+            you.position=mousePos;
+            
+      }, false);
+        ccc[0].addEventListener('mouseup', function(evt) {
+            down=false;
+            eeggshack=0;
+            
+      }, false);
+      ccc[0].addEventListener('mousemove', function(evt) {
+        if(start){
+            var mousePos = getMousePos(ccc[0], evt);
+            you.position=mousePos;
+        }
+           
+      }, false);
+      */
+      //everything else
+    function animate() {
+        //MOVING BACKGROUND
+        back.position.y+=1;
+        if(back.position.y>1280)back.position.y=back2.position.y-1279;
+        back2.position.y+=1;
+        if(back2.position.y>1280)back2.position.y=back.position.y-1279;
+        //SHOOTING EVIL EGGS
+	    if(down){
+            if(!eeggshack--){
+                eeggs[eeggs.length]=new PIXI.Sprite(etexture);
+                eeggs[eeggs.length-1].position.x=you.position.x-6;
+                eeggs[eeggs.length-1].position.y=you.position.y-10;
+                stage.addChild(eeggs[eeggs.length-1]);
+                eeggshack=5;
+            }
+            //DELETING EVIL EGGS
+            while(eeggs[0].position.y<-20){
+                var temp=eeggs[0];
+                eeggs.shift();
+                stage.removeChild(temp);
+                delete temp;
+            }
+        }
+        
+        
+        //MOVING EVIL EGGS
+		for(i=0 ; i<eeggs.length ; i++){
+            eeggs[i].position.y-=5;
+        }
+        
+        
+        //SPAWNING NEW BUNNEHS
+        if(!bunnehshack--){
+            if(bunnehs.length<maxenemies){
+                bunnehs[bunnehs.length]=new PIXI.Sprite(btexture);
+                bunnehs[bunnehs.length-1].position.x=starters[Math.floor((Math.random()*5))];
+                bunnehs[bunnehs.length-1].position.y=0;
+                stage.addChild(bunnehs[bunnehs.length-1]);
+            }
+            bunnehshack=5;
+        }
+        
+        
+        //MOVING BUNNEHS
+        for(i=0 ; i<bunnehs.length ; i++){
+            bunnehs[i].position.y+=Math.floor((Math.random()*3));
+            bunnehs[i].position.x+=5*Math.cos(Math.floor(Math.random()*360));
+            if(bunnehs[i].position.x<0)bunnehs[i].position.x=0;
+            if(bunnehs[i].position.x>300)bunnehs[i].position.x=300;
+        }
+        
+        //DElETING BUNNEHS 
+        if(bunnehs.length>0){
+            while(bunnehs[0].position.y>h+20){
+                    var temp=bunnehs[0];
+                    bunnehs.shift();
+                    stage.removeChild(temp);
+                    delete temp;
+                }
+           }
+           
+        //SPAWNING GOOD EGGS
+        for(i=0 ; i<bunnehs.length ; i++){
+            if(!geggshack[i]--){
+                geggs[geggs.length]=new PIXI.Sprite(gtexture);
+                geggs[geggs.length-1].position.x=bunnehs[i].position.x;
+                geggs[geggs.length-1].position.y=bunnehs[i].position.y;
+                stage.addChild(geggs[geggs.length-1]);
+                geggshack[i]=100;
+            }
+        }
+         //MOVING GOOD EGGS
+		for(i=0 ; i<geggs.length ; i++){
+            geggs[i].position.y+=5;
+        }
+	    // render the stage   
+	    renderer.render(stage);
+        requestAnimFrame( animate );
+	}//END ANIMATE
+    
+    function collide(z, zz)
+            {
+             
+                var safex = z.width / 2 + zz.width / 2; var safey = z.height / 2 + zz.height / 2;
+                if (Math.abs(z.position.x - zz.position.x) < safex && Math.abs(z.position.y - zz.position.y) < safey)
+                    return true;
+	else return false;
+            }
+    
+	</script>
+
+	</body>
+</html>

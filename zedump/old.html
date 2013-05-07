@@ -1,0 +1,68 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>pixi.js example 1</title>
+	<style>
+		body {
+			margin:auto;
+            padding:auto;
+            width : 400px;
+            height: 600px;
+			background-color: #FFFFFF;
+		}
+	</style>
+	<script src="pixi.js"></script>
+    <script src="jquery-1.8.3.min.js"></script>
+	<script src="src/pixi/renderers/WebGLRenderer.js"></script>
+</head>
+<body>
+
+    <script>
+    /*
+    <audio autoplay loop>
+        <source src="back.wav" type="audio/wav">
+    </audio>*/
+    var h=$(window).height();
+	
+	// create an new instance of a pixi stage
+	var stage = new PIXI.Stage(0x999999);
+	
+	// create a renderer instance
+	var renderer = PIXI.autoDetectRenderer(300, h-2);
+	
+	// add the renderer view element to the DOM
+	document.body.appendChild(renderer.view);
+	
+	requestAnimFrame( animate );
+	
+	// create a texture from an image path
+	var texture = PIXI.Texture.fromImage("you.png");
+	// create a new Sprite using the texture
+	var you = new PIXI.Sprite(texture);
+	
+	// center the sprites anchor point
+	you.anchor.x = 0.5;
+	you.anchor.y = 0.5;
+	
+	// move the sprite t the center of the screen
+	you.position.x = 150;
+	you.position.y = 300;
+	
+	stage.addChild(you);
+	
+	function animate() {
+	
+	    
+	
+	    // just for fun, lets rotate mr rabbit a little
+	    //you.rotation += 0.1;
+		
+	    // render the stage   
+	    renderer.render(stage);
+        requestAnimFrame( animate );
+	}
+
+	</script>
+
+	</body>
+</html>
